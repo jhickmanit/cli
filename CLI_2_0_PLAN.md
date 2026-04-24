@@ -4,7 +4,7 @@ This document captures the current 2.0 direction for the Ory CLI. It is intended
 
 ## Status
 
-Draft for review.
+Draft for review. Stage 0 validation is recorded in `CLI_2_0_STAGE_0_VALIDATION.md`.
 
 No implementation work should be assumed complete unless a later section or linked issue/PR marks it complete.
 
@@ -54,6 +54,8 @@ This integration shape must be validated before implementation. The existence of
 - direct calls to deprecated fatal helpers
 - whether endpoint/client injection can be done cleanly
 - whether output and errors can be normalized without forking upstream code
+
+Stage 0 validation found that the adapter-first fallback should be used for the primary 2.0 command surface. Hydra, Kratos, and Keto expose useful constructors and client/proto packages, but direct mounting inherits too many output, error, and process-control risks. Oathkeeper is not cleanly mountable and should remain outside the 2.0 release gate unless a small experimental adapter is explicitly chosen.
 
 ## Agentic CLI Requirements
 
@@ -472,6 +474,7 @@ Work:
 - Mount or adapt Kratos commands into verb/resource paths.
 - Mount or adapt Keto commands into verb/resource paths.
 - Inject clients/endpoints using the target resolver.
+- Prefer local adapter-first commands for the primary 2.0 surface, using upstream SDKs/protos/libraries rather than mounting full upstream Cobra trees.
 - Add product aliases as optional compatibility/escape-hatch paths:
   - `ory hydra ...`
   - `ory kratos ...`
