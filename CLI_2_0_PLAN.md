@@ -407,6 +407,8 @@ Acceptance criteria:
 
 Goal: establish the CLI behavior contract before adding more command surface.
 
+Status: started on branch `cli-2-stage-1-agentic-contract`. The first slice moves process exit back to `main`, introduces typed CLI errors and JSON success/error envelopes, adds root `--output`, `--non-interactive`, `--agent`, and `--no-color` flags, and converts `ory version` into a representative in-process success/failure test target. Most existing command surfaces still use legacy `cmdx` output and error behavior until they are migrated command-by-command.
+
 Work:
 
 - Add an internal execution package that returns an execution result with an error category and exit code.

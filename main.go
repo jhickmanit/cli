@@ -4,11 +4,13 @@
 package main
 
 import (
+	"os"
+
 	"github.com/ory/cli/cmd"
 	"github.com/ory/x/profilex"
 )
 
 func main() {
 	defer profilex.Profile().Stop()
-	cmd.Execute()
+	os.Exit(cmd.Execute())
 }
