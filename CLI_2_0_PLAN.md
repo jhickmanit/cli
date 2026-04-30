@@ -78,6 +78,7 @@ The CLI should define and test a stable machine contract:
 10. Help and command metadata should be inspectable without scraping human-formatted text.
 11. JSON success envelopes and error envelopes should include a `schema_version` field. Breaking output-shape changes require a new schema version, and the support window for old schema versions must be documented before 2.0 GA.
 12. Error envelopes should preserve useful upstream diagnostics such as request IDs and trace IDs when available.
+13. Error `code` values should be treated as a public compatibility surface for CI and agents. They need a documented registry, tests, and migration notes for users who previously parsed human stderr text.
 
 Suggested exit-code categories:
 
@@ -96,6 +97,24 @@ Suggested exit-code categories:
 | 130 | interrupted |
 
 Exact codes can change before implementation, but once shipped they should be treated as API.
+
+The initial error-code registry should include at least:
+
+| Code | Exit code | Meaning |
+| --- | ---: | --- |
+| `unknown_error` | 1 | uncategorized failure |
+| `usage_error` | 2 | invalid flags, arguments, input shape, or validation |
+| `non_interactive_prompt_required` | 2 | command would need a prompt but interactivity is disabled |
+| `configuration_error` | 3 | missing, unreadable, invalid, or incompatible CLI configuration |
+| `authentication_error` | 4 | missing, expired, invalid, or unauthorized credentials |
+| `resource_not_found` | 5 | requested resource does not exist |
+| `conflict` | 6 | resource already exists or state conflict |
+| `network_error` | 7 | transport failure, timeout, or remote 5xx |
+| `unsupported_feature` | 8 | command is unsupported for selected target/profile/capability |
+| `rate_limited` | 9 | remote service throttled the request |
+| `interrupted` | 130 | command interrupted by signal or context cancellation |
+
+Changes to this registry are breaking unless they only add new codes. Release notes must include old stderr text or old command behavior to new `code`/`exit_code` mappings for high-traffic CI workflows.
 
 Initial JSON error envelope shape:
 
@@ -421,6 +440,8 @@ Work:
   - `--no-color`
 - Separate quiet/noise behavior from machine output behavior.
 - Add helper functions for writing success output and errors.
+- Create a documented standard error-code registry and map common local and remote failures to it.
+- Add migration notes for CI users who currently depend on stderr strings or all failures exiting with code 1.
 - Add lint/test coverage that catches direct `os.Exit` in command packages where feasible.
 
 Acceptance criteria:
@@ -428,6 +449,8 @@ Acceptance criteria:
 - New tests can execute commands in-process and observe stdout/stderr/errors without terminating the test process.
 - Agent mode produces parseable JSON for representative success and failure commands.
 - Prompts are rejected with a typed non-interactive error.
+- Representative remote API failures produce stable `code`, `exit_code`, `request_id`, and `trace_id` fields.
+- Stage 1 documentation identifies breaking error-output changes and gives CI migration examples.
 
 ### Stage 2: Config v2 Profiles
 
