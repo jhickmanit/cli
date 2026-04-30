@@ -37,3 +37,29 @@ func TestRemoteErrorWithoutResponseMapsToNetwork(t *testing.T) {
 	require.Equal(t, ExitNetwork, err.ExitCode)
 	require.Equal(t, "unable to list projects", err.Message)
 }
+
+func TestErrorRegistryIsUniqueAndComplete(t *testing.T) {
+	seen := map[ErrorCode]ExitCode{}
+	for _, def := range ErrorRegistry {
+		require.NotEmpty(t, def.Code)
+		require.NotEmpty(t, def.Description)
+		if previous, ok := seen[def.Code]; ok {
+			t.Fatalf("duplicate error code %q with exit codes %d and %d", def.Code, previous, def.ExitCode)
+		}
+		seen[def.Code] = def.ExitCode
+	}
+
+	require.Equal(t, map[ErrorCode]ExitCode{
+		ErrorUnknown:     ExitUnknown,
+		ErrorUsage:       ExitUsage,
+		ErrorPrompt:      ExitUsage,
+		ErrorConfig:      ExitConfig,
+		ErrorAuth:        ExitAuth,
+		ErrorNotFound:    ExitMissing,
+		ErrorConflict:    ExitConflict,
+		ErrorNetwork:     ExitNetwork,
+		ErrorUnsupported: ExitUnsupported,
+		ErrorRateLimited: ExitRateLimited,
+		ErrorInterrupted: ExitInterrupted,
+	}, seen)
+}

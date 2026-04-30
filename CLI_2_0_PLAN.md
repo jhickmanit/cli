@@ -4,7 +4,7 @@ This document captures the current 2.0 direction for the Ory CLI. It is intended
 
 ## Status
 
-Draft for review. Stage 0 validation is recorded in `CLI_2_0_STAGE_0_VALIDATION.md`.
+Draft for review. Stage 0 validation is recorded in `CLI_2_0_STAGE_0_VALIDATION.md`. The Stage 1 error compatibility contract is drafted in `CLI_2_0_ERROR_CONTRACT.md`.
 
 No implementation work should be assumed complete unless a later section or linked issue/PR marks it complete.
 
