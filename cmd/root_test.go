@@ -6,6 +6,9 @@ package cmd
 import (
 	"bytes"
 	"encoding/json"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -71,4 +74,64 @@ func TestAgenticPromptRequiredOutput(t *testing.T) {
 	require.Equal(t, internalagentic.ExitUsage, envelope.ExitCode)
 	require.Equal(t, "this command requires interactive input", envelope.Message)
 	require.Equal(t, "Enter a name for your workspace", envelope.Prompt)
+}
+
+func TestUserFacingCommandsDoNotExitProcess(t *testing.T) {
+	repoRoot, err := filepath.Abs("..")
+	require.NoError(t, err)
+
+	disallowed := []string{
+		"os.Exit(",
+		"cmdx.Must(",
+		"cmdx.Fatalf(",
+	}
+
+	var violations []string
+	err = filepath.WalkDir(repoRoot, func(path string, entry os.DirEntry, err error) error {
+		require.NoError(t, err)
+		if entry.IsDir() {
+			if isProcessExitCheckIgnoredDir(repoRoot, path) {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if !strings.HasSuffix(path, ".go") || strings.HasSuffix(path, "_test.go") {
+			return nil
+		}
+		rel, err := filepath.Rel(repoRoot, path)
+		require.NoError(t, err)
+		if rel == "main.go" {
+			return nil
+		}
+
+		content, err := os.ReadFile(path)
+		require.NoError(t, err)
+		for _, pattern := range disallowed {
+			if strings.Contains(string(content), pattern) {
+				violations = append(violations, rel+" contains "+pattern)
+			}
+		}
+		return nil
+	})
+	require.NoError(t, err)
+	require.Empty(t, violations, "user-facing command code must return errors instead of terminating the process")
+}
+
+func isProcessExitCheckIgnoredDir(repoRoot, path string) bool {
+	rel, err := filepath.Rel(repoRoot, path)
+	if err != nil {
+		return false
+	}
+	switch rel {
+	case ".git",
+		"cmd/clidoc",
+		"cmd/dev",
+		"cmd/pkg",
+		"cmd/cloudx/e2e",
+		"cmd/cloudx/testhelpers",
+		"playwright-traces":
+		return true
+	default:
+		return false
+	}
 }
