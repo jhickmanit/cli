@@ -33,6 +33,7 @@ type ErrorCode string
 const (
 	ErrorUnknown     ErrorCode = "unknown_error"
 	ErrorUsage       ErrorCode = "usage_error"
+	ErrorPrompt      ErrorCode = "non_interactive_prompt_required"
 	ErrorConfig      ErrorCode = "configuration_error"
 	ErrorAuth        ErrorCode = "authentication_error"
 	ErrorNotFound    ErrorCode = "resource_not_found"
@@ -47,6 +48,7 @@ type CLIError struct {
 	Code      ErrorCode `json:"code"`
 	ExitCode  ExitCode  `json:"exit_code"`
 	Message   string    `json:"message"`
+	Prompt    string    `json:"prompt,omitempty"`
 	RequestID string    `json:"request_id,omitempty"`
 	TraceID   string    `json:"trace_id,omitempty"`
 	Details   any       `json:"details,omitempty"`
@@ -86,6 +88,15 @@ func UsageError(err error) *CLIError {
 	return NewError(ErrorUsage, ExitUsage, messageFromError(err), err)
 }
 
+func PromptRequired(prompt string) *CLIError {
+	return &CLIError{
+		Code:     ErrorPrompt,
+		ExitCode: ExitUsage,
+		Message:  "this command requires interactive input",
+		Prompt:   prompt,
+	}
+}
+
 func FromError(err error) *CLIError {
 	if err == nil {
 		return nil
@@ -113,6 +124,7 @@ type ErrorEnvelope struct {
 	Code          ErrorCode `json:"code"`
 	ExitCode      ExitCode  `json:"exit_code"`
 	Message       string    `json:"message"`
+	Prompt        string    `json:"prompt,omitempty"`
 	RequestID     string    `json:"request_id,omitempty"`
 	TraceID       string    `json:"trace_id,omitempty"`
 	Details       any       `json:"details,omitempty"`
@@ -125,6 +137,7 @@ func WriteErrorJSON(w io.Writer, err error) error {
 		Code:          cliErr.Code,
 		ExitCode:      cliErr.ExitCode,
 		Message:       cliErr.Message,
+		Prompt:        cliErr.Prompt,
 		RequestID:     cliErr.RequestID,
 		TraceID:       cliErr.TraceID,
 		Details:       cliErr.Details,

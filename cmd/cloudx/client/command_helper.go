@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"os/user"
+	"strconv"
 	"strings"
 
 	"github.com/gofrs/uuid"
@@ -20,6 +21,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
 
+	"github.com/ory/cli/internal/agentic"
 	cloud "github.com/ory/client-go"
 	"github.com/ory/x/cmdx"
 	"github.com/ory/x/flagx"
@@ -45,6 +47,7 @@ type (
 		projectID, workspaceID uuid.UUID
 		configLocation         string
 		noConfirm, isQuiet     bool
+		nonInteractive         bool
 		VerboseErrWriter       io.Writer
 		Stdin                  *bufio.Reader
 		openBrowserHook        func(string) error
@@ -76,6 +79,12 @@ func WithNoConfirm(noConfirm bool) CommandHelperOption {
 func WithQuiet(isQuiet bool) CommandHelperOption {
 	return func(h *CommandHelper) {
 		h.isQuiet = isQuiet
+	}
+}
+
+func WithNonInteractive(nonInteractive bool) CommandHelperOption {
+	return func(h *CommandHelper) {
+		h.nonInteractive = nonInteractive
 	}
 }
 
@@ -132,6 +141,7 @@ func NewCobraCommandHelper(cmd *cobra.Command, opts ...CommandHelperOption) (*Co
 		WithVerboseErrWriter(stdErr),
 		WithStdin(cmd.InOrStdin()),
 		WithQuiet(quiet),
+		WithNonInteractive(flagBool(cmd, "non-interactive")),
 		WithNoConfirm(flagx.MustGetBool(cmd, FlagYes)),
 	}
 	// we explicitly ignore the error here, because the command might not support the project flag (most do)
@@ -150,6 +160,13 @@ func NewCobraCommandHelper(cmd *cobra.Command, opts ...CommandHelperOption) (*Co
 		return nil, cmdx.PrintOpenAPIError(cmd, err)
 	}
 	return h, nil
+}
+
+func (h *CommandHelper) PromptRequired(prompt string) error {
+	if h.nonInteractive {
+		return agentic.PromptRequired(prompt)
+	}
+	return nil
 }
 
 func NewCommandHelper(ctx context.Context, opts ...CommandHelperOption) (*CommandHelper, error) {
@@ -203,6 +220,15 @@ func NewCommandHelper(ctx context.Context, opts ...CommandHelperOption) (*Comman
 	}
 
 	return h, nil
+}
+
+func flagBool(cmd *cobra.Command, name string) bool {
+	f := cmd.Flag(name)
+	if f == nil {
+		return false
+	}
+	v, _ := strconv.ParseBool(f.Value.String())
+	return v
 }
 
 func (h *CommandHelper) determineWorkspaceID(ctx context.Context, config *Config) error {

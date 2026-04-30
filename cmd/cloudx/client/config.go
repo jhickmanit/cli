@@ -95,6 +95,10 @@ func (h *CommandHelper) getConfig() (*Config, error) {
 					return nil, fmt.Errorf("you have to authenticate the Ory CLI now differently, plese see ory auth for details")
 				}
 
+				const prompt = "Press enter to continue"
+				if err := h.PromptRequired(prompt); err != nil {
+					return nil, err
+				}
 				_, _ = fmt.Fprintln(h.VerboseErrWriter, "Thanks for upgrading! You will now be prompted to log in to the Ory CLI through the Ory Console.")
 				_, _ = fmt.Fprintln(h.VerboseErrWriter, "Press enter to continue...")
 				_, err := h.Stdin.ReadString('\n')

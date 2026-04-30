@@ -53,7 +53,11 @@ func NewCreateProjectCmd() *cobra.Command {
 			}
 
 			for wsID == nil && createWorkspace == "" {
-				_, _ = fmt.Fprint(cmd.ErrOrStderr(), "It seems like you do not have a workspace yet.\nEnter a name for the workspace: ")
+				const prompt = "Enter a name for the workspace"
+				if err := h.PromptRequired(prompt); err != nil {
+					return err
+				}
+				_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "It seems like you do not have a workspace yet.\n%s: ", prompt)
 				createWorkspace, err = h.Stdin.ReadString('\n')
 				if err != nil {
 					return errors.Wrap(err, "failed to read from stdin")
@@ -69,7 +73,11 @@ func NewCreateProjectCmd() *cobra.Command {
 			}
 
 			for name == "" {
-				_, _ = fmt.Fprint(cmd.ErrOrStderr(), "Enter a name for your project: ")
+				const prompt = "Enter a name for your project"
+				if err := h.PromptRequired(prompt); err != nil {
+					return err
+				}
+				_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "%s: ", prompt)
 				name, err = h.Stdin.ReadString('\n')
 				if err != nil {
 					return errors.Wrap(err, "failed to read from stdin")

@@ -35,7 +35,11 @@ func NewCreateCmd() *cobra.Command {
 			}
 
 			for name == "" {
-				_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "Enter a name for your workspace: ")
+				const prompt = "Enter a name for your workspace"
+				if err := h.PromptRequired(prompt); err != nil {
+					return err
+				}
+				_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "%s: ", prompt)
 				name, err = h.Stdin.ReadString('\n')
 				if err != nil {
 					return errors.Wrap(err, "failed to read from stdin")
