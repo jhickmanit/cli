@@ -35,7 +35,8 @@ func TestRemoteErrorWithoutResponseMapsToNetwork(t *testing.T) {
 
 	require.Equal(t, ErrorNetwork, err.Code)
 	require.Equal(t, ExitNetwork, err.ExitCode)
-	require.Equal(t, "unable to list projects", err.Message)
+	require.Equal(t, "unable to list projects: connection refused", err.Message)
+	require.Equal(t, map[string]any{"cause": "connection refused"}, err.Details)
 }
 
 func TestErrorRegistryIsUniqueAndComplete(t *testing.T) {

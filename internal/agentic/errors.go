@@ -122,6 +122,8 @@ func RemoteError(message string, res *http.Response, err error) *CLIError {
 		cliErr.RequestID = firstHeader(res.Header, "X-Request-Id", "X-Request-ID", "X-Ory-Request-Id", "X-Ory-Request-ID")
 		cliErr.TraceID = firstHeader(res.Header, "Traceparent", "X-Trace-Id", "X-Trace-ID")
 		cliErr.Details = map[string]any{"status_code": res.StatusCode}
+	} else if err != nil {
+		cliErr.Details = map[string]any{"cause": err.Error()}
 	}
 	return cliErr
 }
@@ -180,6 +182,9 @@ func remoteErrorCode(res *http.Response) (ErrorCode, ExitCode) {
 
 func messageFromRemote(message string, err error) string {
 	if message != "" {
+		if err != nil {
+			return fmt.Sprintf("%s: %s", message, err)
+		}
 		return message
 	}
 	return messageFromError(err)
