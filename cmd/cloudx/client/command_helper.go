@@ -157,7 +157,7 @@ func NewCobraCommandHelper(cmd *cobra.Command, opts ...CommandHelperOption) (*Co
 	}
 	h, err := NewCommandHelper(cmd.Context(), append(defaultOpts, opts...)...)
 	if err != nil {
-		return nil, cmdx.PrintOpenAPIError(cmd, err)
+		return nil, err
 	}
 	return h, nil
 }
@@ -371,15 +371,15 @@ func (h *CommandHelper) OpenURL(uri string) error {
 
 func handleError(message string, res *http.Response, err error) error {
 	if e := new(cloud.GenericOpenAPIError); errors.As(err, &e) {
-		return fmt.Errorf("%s: %s: %w", message, e.Body(), err)
+		return agentic.RemoteErrorWithBody(message, res, e.Body(), err)
 	}
 
 	if res == nil {
-		return fmt.Errorf("%s: %w", message, err)
+		return agentic.RemoteError(message, nil, err)
 	}
 
 	body, _ := io.ReadAll(res.Body)
-	return fmt.Errorf("%s: %s: %w", message, body, err)
+	return agentic.RemoteErrorWithBody(message, res, body, err)
 }
 
 func toPatch(op string, values []string) (patches []cloud.JsonPatch, err error) {

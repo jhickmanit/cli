@@ -4,10 +4,13 @@
 package agentic
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
+	"strings"
 )
 
 const SchemaVersion = "v1"
@@ -97,6 +100,25 @@ func PromptRequired(prompt string) *CLIError {
 	}
 }
 
+func RemoteError(message string, res *http.Response, err error) *CLIError {
+	code, exitCode := remoteErrorCode(res)
+	cliErr := NewError(code, exitCode, messageFromRemote(message, err), err)
+	if res != nil {
+		cliErr.RequestID = firstHeader(res.Header, "X-Request-Id", "X-Request-ID", "X-Ory-Request-Id", "X-Ory-Request-ID")
+		cliErr.TraceID = firstHeader(res.Header, "Traceparent", "X-Trace-Id", "X-Trace-ID")
+		cliErr.Details = map[string]any{"status_code": res.StatusCode}
+	}
+	return cliErr
+}
+
+func RemoteErrorWithBody(message string, res *http.Response, body []byte, err error) *CLIError {
+	cliErr := RemoteError(message, res, err)
+	if parsed := parseRemoteErrorBody(body); parsed != "" {
+		cliErr.Message = parsed
+	}
+	return cliErr
+}
+
 func FromError(err error) *CLIError {
 	if err == nil {
 		return nil
@@ -117,6 +139,78 @@ func FromError(err error) *CLIError {
 	}
 
 	return NewError(ErrorUnknown, ExitUnknown, err.Error(), err)
+}
+
+func remoteErrorCode(res *http.Response) (ErrorCode, ExitCode) {
+	if res == nil {
+		return ErrorNetwork, ExitNetwork
+	}
+	switch res.StatusCode {
+	case http.StatusBadRequest, http.StatusUnprocessableEntity:
+		return ErrorUsage, ExitUsage
+	case http.StatusUnauthorized, http.StatusForbidden:
+		return ErrorAuth, ExitAuth
+	case http.StatusNotFound:
+		return ErrorNotFound, ExitMissing
+	case http.StatusConflict:
+		return ErrorConflict, ExitConflict
+	case http.StatusTooManyRequests:
+		return ErrorRateLimited, ExitRateLimited
+	}
+	if res.StatusCode >= 500 {
+		return ErrorNetwork, ExitNetwork
+	}
+	return ErrorNetwork, ExitNetwork
+}
+
+func messageFromRemote(message string, err error) string {
+	if message != "" {
+		return message
+	}
+	return messageFromError(err)
+}
+
+func parseRemoteErrorBody(body []byte) string {
+	body = bytes.TrimSpace(body)
+	if len(body) == 0 {
+		return ""
+	}
+
+	var payload struct {
+		Error struct {
+			Message string `json:"message"`
+			Reason  string `json:"reason"`
+		} `json:"error"`
+		Message string `json:"message"`
+		Reason  string `json:"reason"`
+	}
+	if err := json.Unmarshal(body, &payload); err != nil {
+		return ""
+	}
+
+	parts := make([]string, 0, 2)
+	if payload.Error.Message != "" {
+		parts = append(parts, payload.Error.Message)
+	}
+	if payload.Error.Reason != "" {
+		parts = append(parts, payload.Error.Reason)
+	}
+	if payload.Message != "" {
+		parts = append(parts, payload.Message)
+	}
+	if payload.Reason != "" {
+		parts = append(parts, payload.Reason)
+	}
+	return strings.Join(parts, "\n")
+}
+
+func firstHeader(h http.Header, names ...string) string {
+	for _, name := range names {
+		if v := h.Get(name); v != "" {
+			return v
+		}
+	}
+	return ""
 }
 
 type ErrorEnvelope struct {
