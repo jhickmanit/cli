@@ -78,7 +78,7 @@ The CLI should define and test a stable machine contract:
 10. Help and command metadata should be inspectable without scraping human-formatted text.
 11. JSON success envelopes and error envelopes should include a `schema_version` field. Breaking output-shape changes require a new schema version, and the support window for old schema versions must be documented before 2.0 GA.
 12. Error envelopes should preserve useful upstream diagnostics such as request IDs and trace IDs when available.
-13. Error `code` values should be treated as a public compatibility surface for CI and agents. They need a documented registry, tests, and migration notes for users who previously parsed human stderr text.
+13. Error `code` and `code_number` values should be treated as a public compatibility surface for CI and agents. They need a documented registry, tests, and migration notes for users who previously parsed human stderr text.
 
 Suggested exit-code categories:
 
@@ -100,21 +100,21 @@ Exact codes can change before implementation, but once shipped they should be tr
 
 The initial error-code registry should include at least:
 
-| Code | Exit code | Meaning |
-| --- | ---: | --- |
-| `unknown_error` | 1 | uncategorized failure |
-| `usage_error` | 2 | invalid flags, arguments, input shape, or validation |
-| `non_interactive_prompt_required` | 2 | command would need a prompt but interactivity is disabled |
-| `configuration_error` | 3 | missing, unreadable, invalid, or incompatible CLI configuration |
-| `authentication_error` | 4 | missing, expired, invalid, or unauthorized credentials |
-| `resource_not_found` | 5 | requested resource does not exist |
-| `conflict` | 6 | resource already exists or state conflict |
-| `network_error` | 7 | transport failure, timeout, or remote 5xx |
-| `unsupported_feature` | 8 | command is unsupported for selected target/profile/capability |
-| `rate_limited` | 9 | remote service throttled the request |
-| `interrupted` | 130 | command interrupted by signal or context cancellation |
+| Code | Code number | Exit code | Meaning |
+| --- | ---: | ---: | --- |
+| `unknown_error` | 1000 | 1 | uncategorized failure |
+| `usage_error` | 1001 | 2 | invalid flags, arguments, input shape, or validation |
+| `configuration_error` | 1100 | 3 | missing, unreadable, invalid, or incompatible CLI configuration |
+| `authentication_error` | 1101 | 4 | missing, expired, invalid, or unauthorized credentials |
+| `unsupported_feature` | 1200 | 8 | command is unsupported for selected target/profile/capability |
+| `non_interactive_prompt_required` | 1300 | 2 | command would need a prompt but interactivity is disabled |
+| `resource_not_found` | 1404 | 5 | requested resource does not exist |
+| `conflict` | 1409 | 6 | resource already exists or state conflict |
+| `rate_limited` | 1429 | 9 | remote service throttled the request |
+| `network_error` | 1500 | 7 | transport failure, timeout, or remote 5xx |
+| `interrupted` | 1900 | 130 | command interrupted by signal or context cancellation |
 
-Changes to this registry are breaking unless they only add new codes. Release notes must include old stderr text or old command behavior to new `code`/`exit_code` mappings for high-traffic CI workflows.
+Changes to this registry are breaking unless they only add new codes. Release notes must include old stderr text or old command behavior to new `code`/`code_number`/`exit_code` mappings for high-traffic CI workflows.
 
 Initial JSON error envelope shape:
 
@@ -122,6 +122,7 @@ Initial JSON error envelope shape:
 {
   "schema_version": "v1",
   "code": "resource_not_found",
+  "code_number": 1404,
   "exit_code": 5,
   "message": "resource was not found",
   "request_id": "...",
@@ -136,6 +137,7 @@ Initial non-interactive prompt error shape:
 {
   "schema_version": "v1",
   "code": "non_interactive_prompt_required",
+  "code_number": 1300,
   "exit_code": 2,
   "message": "this command requires interactive input",
   "prompt": "Enter a name for your project"

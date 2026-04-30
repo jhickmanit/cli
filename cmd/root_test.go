@@ -50,6 +50,7 @@ func TestAgenticErrorOutput(t *testing.T) {
 	require.NoError(t, json.Unmarshal(stderr.Bytes(), &envelope))
 	require.Equal(t, internalagentic.SchemaVersion, envelope.SchemaVersion)
 	require.Equal(t, internalagentic.ErrorUsage, envelope.Code)
+	require.Equal(t, internalagentic.ErrorNumberUsage, envelope.CodeNumber)
 	require.Equal(t, internalagentic.ExitUsage, envelope.ExitCode)
 	require.Contains(t, envelope.Message, "version accepts no arguments")
 }
@@ -66,6 +67,7 @@ func TestAgenticPromptRequiredOutput(t *testing.T) {
 	require.NoError(t, json.Unmarshal(stderr.Bytes(), &envelope))
 	require.Equal(t, internalagentic.SchemaVersion, envelope.SchemaVersion)
 	require.Equal(t, internalagentic.ErrorPrompt, envelope.Code)
+	require.Equal(t, internalagentic.ErrorNumberPrompt, envelope.CodeNumber)
 	require.Equal(t, internalagentic.ExitUsage, envelope.ExitCode)
 	require.Equal(t, "this command requires interactive input", envelope.Message)
 	require.Equal(t, "Enter a name for your workspace", envelope.Prompt)

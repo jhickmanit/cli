@@ -32,6 +32,7 @@ const (
 )
 
 type ErrorCode string
+type ErrorNumber int
 
 const (
 	ErrorUnknown     ErrorCode = "unknown_error"
@@ -45,6 +46,20 @@ const (
 	ErrorUnsupported ErrorCode = "unsupported_feature"
 	ErrorRateLimited ErrorCode = "rate_limited"
 	ErrorInterrupted ErrorCode = "interrupted"
+)
+
+const (
+	ErrorNumberUnknown     ErrorNumber = 1000
+	ErrorNumberUsage       ErrorNumber = 1001
+	ErrorNumberConfig      ErrorNumber = 1100
+	ErrorNumberAuth        ErrorNumber = 1101
+	ErrorNumberUnsupported ErrorNumber = 1200
+	ErrorNumberPrompt      ErrorNumber = 1300
+	ErrorNumberNotFound    ErrorNumber = 1404
+	ErrorNumberConflict    ErrorNumber = 1409
+	ErrorNumberRateLimited ErrorNumber = 1429
+	ErrorNumberNetwork     ErrorNumber = 1500
+	ErrorNumberInterrupted ErrorNumber = 1900
 )
 
 type CLIError struct {
@@ -214,14 +229,15 @@ func firstHeader(h http.Header, names ...string) string {
 }
 
 type ErrorEnvelope struct {
-	SchemaVersion string    `json:"schema_version"`
-	Code          ErrorCode `json:"code"`
-	ExitCode      ExitCode  `json:"exit_code"`
-	Message       string    `json:"message"`
-	Prompt        string    `json:"prompt,omitempty"`
-	RequestID     string    `json:"request_id,omitempty"`
-	TraceID       string    `json:"trace_id,omitempty"`
-	Details       any       `json:"details,omitempty"`
+	SchemaVersion string      `json:"schema_version"`
+	Code          ErrorCode   `json:"code"`
+	CodeNumber    ErrorNumber `json:"code_number"`
+	ExitCode      ExitCode    `json:"exit_code"`
+	Message       string      `json:"message"`
+	Prompt        string      `json:"prompt,omitempty"`
+	RequestID     string      `json:"request_id,omitempty"`
+	TraceID       string      `json:"trace_id,omitempty"`
+	Details       any         `json:"details,omitempty"`
 }
 
 func WriteErrorJSON(w io.Writer, err error) error {
@@ -229,6 +245,7 @@ func WriteErrorJSON(w io.Writer, err error) error {
 	return json.NewEncoder(w).Encode(ErrorEnvelope{
 		SchemaVersion: SchemaVersion,
 		Code:          cliErr.Code,
+		CodeNumber:    CodeNumber(cliErr.Code),
 		ExitCode:      cliErr.ExitCode,
 		Message:       cliErr.Message,
 		Prompt:        cliErr.Prompt,

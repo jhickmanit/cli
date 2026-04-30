@@ -39,27 +39,41 @@ func TestRemoteErrorWithoutResponseMapsToNetwork(t *testing.T) {
 }
 
 func TestErrorRegistryIsUniqueAndComplete(t *testing.T) {
-	seen := map[ErrorCode]ExitCode{}
+	seenCodes := map[ErrorCode]ErrorDefinition{}
+	seenNumbers := map[ErrorNumber]ErrorCode{}
 	for _, def := range ErrorRegistry {
 		require.NotEmpty(t, def.Code)
+		require.NotZero(t, def.CodeNumber)
 		require.NotEmpty(t, def.Description)
-		if previous, ok := seen[def.Code]; ok {
-			t.Fatalf("duplicate error code %q with exit codes %d and %d", def.Code, previous, def.ExitCode)
+		if previous, ok := seenCodes[def.Code]; ok {
+			t.Fatalf("duplicate error code %q with exit codes %d and %d", def.Code, previous.ExitCode, def.ExitCode)
 		}
-		seen[def.Code] = def.ExitCode
+		if previous, ok := seenNumbers[def.CodeNumber]; ok {
+			t.Fatalf("duplicate error number %d for codes %q and %q", def.CodeNumber, previous, def.Code)
+		}
+		seenCodes[def.Code] = def
+		seenNumbers[def.CodeNumber] = def.Code
 	}
 
-	require.Equal(t, map[ErrorCode]ExitCode{
-		ErrorUnknown:     ExitUnknown,
-		ErrorUsage:       ExitUsage,
-		ErrorPrompt:      ExitUsage,
-		ErrorConfig:      ExitConfig,
-		ErrorAuth:        ExitAuth,
-		ErrorNotFound:    ExitMissing,
-		ErrorConflict:    ExitConflict,
-		ErrorNetwork:     ExitNetwork,
-		ErrorUnsupported: ExitUnsupported,
-		ErrorRateLimited: ExitRateLimited,
-		ErrorInterrupted: ExitInterrupted,
-	}, seen)
+	expected := map[ErrorCode]ErrorDefinition{
+		ErrorUnknown:     {Code: ErrorUnknown, CodeNumber: ErrorNumberUnknown, ExitCode: ExitUnknown},
+		ErrorUsage:       {Code: ErrorUsage, CodeNumber: ErrorNumberUsage, ExitCode: ExitUsage},
+		ErrorPrompt:      {Code: ErrorPrompt, CodeNumber: ErrorNumberPrompt, ExitCode: ExitUsage},
+		ErrorConfig:      {Code: ErrorConfig, CodeNumber: ErrorNumberConfig, ExitCode: ExitConfig},
+		ErrorAuth:        {Code: ErrorAuth, CodeNumber: ErrorNumberAuth, ExitCode: ExitAuth},
+		ErrorNotFound:    {Code: ErrorNotFound, CodeNumber: ErrorNumberNotFound, ExitCode: ExitMissing},
+		ErrorConflict:    {Code: ErrorConflict, CodeNumber: ErrorNumberConflict, ExitCode: ExitConflict},
+		ErrorNetwork:     {Code: ErrorNetwork, CodeNumber: ErrorNumberNetwork, ExitCode: ExitNetwork},
+		ErrorUnsupported: {Code: ErrorUnsupported, CodeNumber: ErrorNumberUnsupported, ExitCode: ExitUnsupported},
+		ErrorRateLimited: {Code: ErrorRateLimited, CodeNumber: ErrorNumberRateLimited, ExitCode: ExitRateLimited},
+		ErrorInterrupted: {Code: ErrorInterrupted, CodeNumber: ErrorNumberInterrupted, ExitCode: ExitInterrupted},
+	}
+	require.Equal(t, len(expected), len(seenCodes))
+	for code, expectedDef := range expected {
+		actual := seenCodes[code]
+		require.Equal(t, expectedDef.Code, actual.Code)
+		require.Equal(t, expectedDef.CodeNumber, actual.CodeNumber)
+		require.Equal(t, expectedDef.ExitCode, actual.ExitCode)
+		require.Equal(t, expectedDef.CodeNumber, CodeNumber(code))
+	}
 }
