@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ory/cli/cmd/cloudx/client"
+	"github.com/ory/cli/internal/agentic"
 	"github.com/ory/x/cmdx"
 )
 
@@ -25,8 +26,7 @@ func NewAuthCmd() *cobra.Command {
 				return err
 			}
 
-			cmdx.PrintRow(cmd, ac)
-			return nil
+			return agentic.WriteRow(cmd, ac)
 		},
 	}
 	client.RegisterConfigFlag(cmd.PersistentFlags())

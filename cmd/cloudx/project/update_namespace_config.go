@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ory/cli/cmd/cloudx/client"
+	"github.com/ory/cli/internal/agentic"
 	"github.com/ory/x/cmdx"
 	"github.com/ory/x/osx"
 )
@@ -53,8 +54,9 @@ class Example implements Namespace {}
 				return err
 			}
 
-			cmdx.PrintJSONAble(cmd, outputConfig(p.Project.Services.Permission.Config))
-
+			if err := agentic.WriteJSONAble(cmd, outputConfig(p.Project.Services.Permission.Config)); err != nil {
+				return err
+			}
 			return h.PrintUpdateProjectWarnings(p)
 		},
 	}

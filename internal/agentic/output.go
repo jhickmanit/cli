@@ -32,6 +32,30 @@ func WriteTable(cmd *cobra.Command, out cmdx.Table) error {
 	return nil
 }
 
+func WriteRow(cmd *cobra.Command, out cmdx.TableRow) error {
+	if WantsJSONEnvelope(cmd) {
+		return WriteSuccessJSON(cmd.Root().OutOrStdout(), out.Interface())
+	}
+
+	cmdx.PrintRow(cmd, out)
+	return nil
+}
+
+func WriteJSONAble(cmd *cobra.Command, out interface{ String() string }) error {
+	if WantsJSONEnvelope(cmd) {
+		if out == nil {
+			return WriteSuccessJSON(cmd.Root().OutOrStdout(), nil)
+		}
+		if i, ok := out.(interface{ Interface() interface{} }); ok {
+			return WriteSuccessJSON(cmd.Root().OutOrStdout(), i.Interface())
+		}
+		return WriteSuccessJSON(cmd.Root().OutOrStdout(), out)
+	}
+
+	cmdx.PrintJSONAble(cmd, out)
+	return nil
+}
+
 func flagBool(cmd *cobra.Command, name string) bool {
 	f := cmd.Flag(name)
 	if f == nil {

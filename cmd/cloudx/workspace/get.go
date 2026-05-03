@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ory/cli/cmd/cloudx/client"
+	"github.com/ory/cli/internal/agentic"
 	"github.com/ory/x/cmdx"
 )
 
@@ -27,8 +28,7 @@ func NewGetCmd() *cobra.Command {
 				return err
 			}
 
-			cmdx.PrintRow(cmd, (*outputWorkspace)(workspace))
-			return nil
+			return agentic.WriteRow(cmd, (*outputWorkspace)(workspace))
 		},
 	}
 	cmdx.RegisterFormatFlags(cmd.Flags())

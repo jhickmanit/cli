@@ -92,7 +92,7 @@ As an example an input could look like:
 	return cmd
 }
 
-func runUpdate(filePrefixer func([]json.RawMessage) ([]json.RawMessage, error), outputter func(*cobra.Command, *cloud.SuccessfulProjectUpdate)) func(*cobra.Command, []string) error {
+func runUpdate(filePrefixer func([]json.RawMessage) ([]json.RawMessage, error), outputter func(*cobra.Command, *cloud.SuccessfulProjectUpdate) error) func(*cobra.Command, []string) error {
 	return func(cmd *cobra.Command, args []string) (err error) {
 		opts := make([]client.CommandHelperOption, 0, 1)
 		if len(args) == 1 {
@@ -136,7 +136,9 @@ func runUpdate(filePrefixer func([]json.RawMessage) ([]json.RawMessage, error), 
 			return err
 		}
 
-		outputter(cmd, p)
+		if err := outputter(cmd, p); err != nil {
+			return err
+		}
 		return h.PrintUpdateProjectWarnings(p)
 	}
 }

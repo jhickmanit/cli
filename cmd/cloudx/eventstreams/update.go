@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ory/cli/cmd/cloudx/client"
+	"github.com/ory/cli/internal/agentic"
 	cloud "github.com/ory/client-go"
 
 	"github.com/ory/x/cmdx"
@@ -43,8 +44,7 @@ func NewUpdateEventStreamCmd() *cobra.Command {
 			}
 
 			_, _ = fmt.Fprintln(h.VerboseErrWriter, "Event stream updated successfully!")
-			cmdx.PrintRow(cmd, output(*stream))
-			return nil
+			return agentic.WriteRow(cmd, output(*stream))
 		},
 	}
 

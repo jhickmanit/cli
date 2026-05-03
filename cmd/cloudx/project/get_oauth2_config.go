@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ory/cli/cmd/cloudx/client"
+	"github.com/ory/cli/internal/agentic"
 	"github.com/ory/x/cmdx"
 )
 
@@ -52,8 +53,7 @@ $ ory get oauth2-config --format json   # uses currently selected project
 				return err
 			}
 
-			cmdx.PrintJSONAble(cmd, outputConfig(project.Services.Oauth2.Config))
-			return nil
+			return agentic.WriteJSONAble(cmd, outputConfig(project.Services.Oauth2.Config))
 		},
 	}
 

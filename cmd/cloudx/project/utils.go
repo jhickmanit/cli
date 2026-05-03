@@ -9,8 +9,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/tidwall/sjson"
 
+	"github.com/ory/cli/internal/agentic"
 	cloud "github.com/ory/client-go"
-	"github.com/ory/x/cmdx"
 )
 
 func prefixConfig(prefix string, s []string) []string {
@@ -59,18 +59,18 @@ func prefixFileNop(s []json.RawMessage) ([]json.RawMessage, error) {
 	return s, nil
 }
 
-func outputFullProject(cmd *cobra.Command, p *cloud.SuccessfulProjectUpdate) {
-	cmdx.PrintRow(cmd, (*outputProject)(&p.Project))
+func outputFullProject(cmd *cobra.Command, p *cloud.SuccessfulProjectUpdate) error {
+	return agentic.WriteRow(cmd, (*outputProject)(&p.Project))
 }
 
-func outputIdentityConfig(cmd *cobra.Command, p *cloud.SuccessfulProjectUpdate) {
-	cmdx.PrintJSONAble(cmd, outputConfig(p.Project.Services.Identity.Config))
+func outputIdentityConfig(cmd *cobra.Command, p *cloud.SuccessfulProjectUpdate) error {
+	return agentic.WriteJSONAble(cmd, outputConfig(p.Project.Services.Identity.Config))
 }
 
-func outputPermissionConfig(cmd *cobra.Command, p *cloud.SuccessfulProjectUpdate) {
-	cmdx.PrintJSONAble(cmd, outputConfig(p.Project.Services.Permission.Config))
+func outputPermissionConfig(cmd *cobra.Command, p *cloud.SuccessfulProjectUpdate) error {
+	return agentic.WriteJSONAble(cmd, outputConfig(p.Project.Services.Permission.Config))
 }
 
-func outputOAuth2Config(cmd *cobra.Command, p *cloud.SuccessfulProjectUpdate) {
-	cmdx.PrintJSONAble(cmd, outputConfig(p.Project.Services.Oauth2.Config))
+func outputOAuth2Config(cmd *cobra.Command, p *cloud.SuccessfulProjectUpdate) error {
+	return agentic.WriteJSONAble(cmd, outputConfig(p.Project.Services.Oauth2.Config))
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ory/cli/cmd/cloudx/client"
+	"github.com/ory/cli/internal/agentic"
 	cloud "github.com/ory/client-go"
 
 	"github.com/ory/x/cmdx"
@@ -42,8 +43,7 @@ func NewCreateOrganizationCmd() *cobra.Command {
 			}
 
 			_, _ = fmt.Fprintln(h.VerboseErrWriter, "Organization created successfully!")
-			cmdx.PrintRow(cmd, output(*organization))
-			return nil
+			return agentic.WriteRow(cmd, output(*organization))
 		},
 	}
 

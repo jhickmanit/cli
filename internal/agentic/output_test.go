@@ -62,3 +62,59 @@ func TestWriteTableKeepsDefaultTableOutput(t *testing.T) {
 	require.Contains(t, stdout.String(), "VALUE")
 	require.Contains(t, stdout.String(), "alpha")
 }
+
+func TestWriteRowWrapsAgentOutput(t *testing.T) {
+	cmd := &cobra.Command{}
+	cmd.Flags().Bool("agent", true, "")
+	var stdout bytes.Buffer
+	cmd.SetOut(&stdout)
+
+	require.NoError(t, WriteRow(cmd, testRow{value: "alpha"}))
+
+	var envelope SuccessEnvelope
+	require.NoError(t, json.Unmarshal(stdout.Bytes(), &envelope))
+	require.Equal(t, SchemaVersion, envelope.SchemaVersion)
+	require.Equal(t, map[string]interface{}{"value": "alpha"}, envelope.Data)
+}
+
+func TestWriteJSONAbleWrapsAgentOutput(t *testing.T) {
+	cmd := &cobra.Command{}
+	cmd.Flags().Bool("agent", true, "")
+	var stdout bytes.Buffer
+	cmd.SetOut(&stdout)
+
+	require.NoError(t, WriteJSONAble(cmd, testJSONAble{value: "alpha"}))
+
+	var envelope SuccessEnvelope
+	require.NoError(t, json.Unmarshal(stdout.Bytes(), &envelope))
+	require.Equal(t, SchemaVersion, envelope.SchemaVersion)
+	require.Equal(t, map[string]interface{}{"value": "alpha"}, envelope.Data)
+}
+
+type testRow struct {
+	value string
+}
+
+func (t testRow) Header() []string {
+	return []string{"VALUE"}
+}
+
+func (t testRow) Columns() []string {
+	return []string{t.value}
+}
+
+func (t testRow) Interface() interface{} {
+	return map[string]string{"value": t.value}
+}
+
+type testJSONAble struct {
+	value string
+}
+
+func (t testJSONAble) String() string {
+	return t.value
+}
+
+func (t testJSONAble) Interface() interface{} {
+	return map[string]string{"value": t.value}
+}

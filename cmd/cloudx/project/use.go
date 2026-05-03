@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ory/cli/cmd/cloudx/client"
+	"github.com/ory/cli/internal/agentic"
 	"github.com/ory/x/cmdx"
 )
 
@@ -43,8 +44,7 @@ $ ory use project ecaaa3cb-0730-4ee8-a6df-9553cdfeef89 --format json
 				return err
 			}
 
-			cmdx.PrintRow(cmd, &selectedProject{ID: id})
-			return nil
+			return agentic.WriteRow(cmd, &selectedProject{ID: id})
 		},
 	}
 

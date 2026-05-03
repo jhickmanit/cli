@@ -57,7 +57,7 @@ The format of the patch is a JSON-Patch document. For more details please check:
 	return cmd
 }
 
-func runPatch(patchPrefixer func([]string) []string, filePrefixer func([]json.RawMessage) ([]json.RawMessage, error), outputter func(*cobra.Command, *cloud.SuccessfulProjectUpdate)) func(cmd *cobra.Command, args []string) error {
+func runPatch(patchPrefixer func([]string) []string, filePrefixer func([]json.RawMessage) ([]json.RawMessage, error), outputter func(*cobra.Command, *cloud.SuccessfulProjectUpdate) error) func(cmd *cobra.Command, args []string) error {
 	return func(cmd *cobra.Command, args []string) error {
 		ctx := cmd.Context()
 		opts := make([]client.CommandHelperOption, 0, 1)
@@ -97,7 +97,9 @@ func runPatch(patchPrefixer func([]string) []string, filePrefixer func([]json.Ra
 			return err
 		}
 
-		outputter(cmd, p)
+		if err := outputter(cmd, p); err != nil {
+			return err
+		}
 		return h.PrintUpdateProjectWarnings(p)
 	}
 }

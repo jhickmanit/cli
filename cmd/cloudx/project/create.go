@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/pflag"
 
 	"github.com/ory/cli/cmd/cloudx/client"
+	"github.com/ory/cli/internal/agentic"
 
 	"github.com/ory/x/cmdx"
 	"github.com/ory/x/flagx"
@@ -90,8 +91,7 @@ func NewCreateProjectCmd() *cobra.Command {
 			}
 
 			_, _ = fmt.Fprintln(h.VerboseErrWriter, "Project created successfully!")
-			cmdx.PrintRow(cmd, (*outputProject)(p))
-			return nil
+			return agentic.WriteRow(cmd, (*outputProject)(p))
 		},
 	}
 

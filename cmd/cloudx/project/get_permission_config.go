@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ory/cli/cmd/cloudx/client"
+	"github.com/ory/cli/internal/agentic"
 	"github.com/ory/x/cmdx"
 )
 
@@ -45,8 +46,7 @@ $ ory get permission-config --format json   # uses currently selected project
 				return err
 			}
 
-			cmdx.PrintJSONAble(cmd, outputConfig(project.Services.Permission.Config))
-			return nil
+			return agentic.WriteJSONAble(cmd, outputConfig(project.Services.Permission.Config))
 		},
 	}
 

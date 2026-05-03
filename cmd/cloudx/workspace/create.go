@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ory/cli/cmd/cloudx/client"
+	"github.com/ory/cli/internal/agentic"
 	"github.com/ory/x/cmdx"
 	"github.com/ory/x/flagx"
 )
@@ -52,8 +53,7 @@ func NewCreateCmd() *cobra.Command {
 			}
 
 			_, _ = fmt.Fprintf(h.VerboseErrWriter, "Workspace created successfully!")
-			cmdx.PrintRow(cmd, (*outputWorkspace)(ws))
-			return nil
+			return agentic.WriteRow(cmd, (*outputWorkspace)(ws))
 		},
 	}
 
