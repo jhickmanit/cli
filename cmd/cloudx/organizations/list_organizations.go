@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ory/cli/cmd/cloudx/client"
+	"github.com/ory/cli/internal/agentic"
 	"github.com/ory/x/cmdx"
 )
 
@@ -31,8 +32,7 @@ func NewListOrganizationsCmd() *cobra.Command {
 				return cmdx.PrintOpenAPIError(cmd, err)
 			}
 
-			cmdx.PrintTable(cmd, &outputOrganizations{organizations})
-			return nil
+			return agentic.WriteTable(cmd, &outputOrganizations{organizations})
 		},
 	}
 

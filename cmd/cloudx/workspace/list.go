@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ory/cli/cmd/cloudx/client"
-	"github.com/ory/x/cmdx"
+	"github.com/ory/cli/internal/agentic"
 )
 
 func NewListCmd() *cobra.Command {
@@ -27,8 +27,7 @@ func NewListCmd() *cobra.Command {
 				return err
 			}
 
-			cmdx.PrintTable(cmd, (outputWorkspaces)(workspaces))
-			return nil
+			return agentic.WriteTable(cmd, (outputWorkspaces)(workspaces))
 		},
 	}
 }
