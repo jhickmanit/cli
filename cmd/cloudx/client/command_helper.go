@@ -169,6 +169,10 @@ func (h *CommandHelper) PromptRequired(prompt string) error {
 	return nil
 }
 
+func (h *CommandHelper) NonInteractive() bool {
+	return h.nonInteractive
+}
+
 func NewCommandHelper(ctx context.Context, opts ...CommandHelperOption) (*CommandHelper, error) {
 	location, err := getConfigPath()
 	if err != nil {

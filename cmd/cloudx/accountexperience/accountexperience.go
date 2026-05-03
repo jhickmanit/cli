@@ -14,6 +14,7 @@ import (
 	"github.com/ory/x/stringsx"
 
 	"github.com/ory/cli/cmd/cloudx/client"
+	"github.com/ory/cli/internal/agentic"
 	"github.com/ory/x/cmdx"
 )
 
@@ -46,13 +47,15 @@ func NewAccountExperienceOpenCmd() *cobra.Command {
 
 			url := client.CloudAPIsURL(project.Slug + ".projects")
 			url.Path = path.Join(url.Path, "ui", args[0])
-			if flagx.MustGetBool(cmd, cmdx.FlagQuiet) {
+			if flagx.MustGetBool(cmd, cmdx.FlagQuiet) || h.NonInteractive() || agentic.WantsJSONEnvelope(cmd) {
+				if agentic.WantsJSONEnvelope(cmd) {
+					return agentic.WriteSuccessJSON(cmd.Root().OutOrStdout(), map[string]string{"url": url.String()})
+				}
 				_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%s\n", url)
 				return nil
 			}
 			if err := h.OpenURL(url.String()); err != nil {
-				_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "%s\n\nUnable to automatically open %s in your browser. Please open it manually!\n", err, url)
-				return cmdx.FailSilently(cmd)
+				return fmt.Errorf("unable to automatically open %s in your browser: %w", url, err)
 			}
 			return nil
 		},

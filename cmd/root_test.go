@@ -99,6 +99,7 @@ func TestUserFacingCommandsDoNotExitProcess(t *testing.T) {
 		"os.Exit(",
 		"cmdx.Must(",
 		"cmdx.Fatalf(",
+		"cmdx.FailSilently(",
 	}
 
 	var violations []string
