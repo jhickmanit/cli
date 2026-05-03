@@ -41,7 +41,7 @@ $ ory get identity-config --format json   # uses currently selected project
 			}
 			project, err := h.GetProject(cmd.Context(), pID, nil)
 			if err != nil {
-				return cmdx.PrintOpenAPIError(cmd, err)
+				return err
 			}
 
 			cmdx.PrintJSONAble(cmd, outputConfig(project.Services.Identity.Config))

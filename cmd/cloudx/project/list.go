@@ -8,7 +8,6 @@ import (
 
 	"github.com/ory/cli/cmd/cloudx/client"
 	"github.com/ory/cli/internal/agentic"
-	"github.com/ory/x/cmdx"
 )
 
 func NewListProjectsCmd() *cobra.Command {
@@ -23,7 +22,7 @@ func NewListProjectsCmd() *cobra.Command {
 
 			projects, err := h.ListProjects(cmd.Context(), h.WorkspaceID())
 			if err != nil {
-				return cmdx.PrintOpenAPIError(cmd, err)
+				return err
 			}
 
 			return agentic.WriteTable(cmd, &outputProjectCollection{projects})

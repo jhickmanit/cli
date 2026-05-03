@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ory/cli/cmd/cloudx/client"
-	"github.com/ory/x/cmdx"
 )
 
 func NewDeleteOrganizationCmd() *cobra.Command {
@@ -25,13 +24,13 @@ func NewDeleteOrganizationCmd() *cobra.Command {
 
 			projectID, err := h.ProjectID()
 			if err != nil {
-				return cmdx.PrintOpenAPIError(cmd, err)
+				return err
 			}
 			orgID := args[0]
 
 			err = h.DeleteOrganization(cmd.Context(), projectID, orgID)
 			if err != nil {
-				return cmdx.PrintOpenAPIError(cmd, err)
+				return err
 			}
 
 			_, _ = fmt.Fprintln(h.VerboseErrWriter, "Organization deleted successfully!")

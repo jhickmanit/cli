@@ -36,11 +36,11 @@ $ ory use project ecaaa3cb-0730-4ee8-a6df-9553cdfeef89 --format json
 
 			id, err := h.ProjectID()
 			if err != nil {
-				return cmdx.PrintOpenAPIError(cmd, err)
+				return err
 			}
 
 			if err := h.SelectProject(id); err != nil {
-				return cmdx.PrintOpenAPIError(cmd, err)
+				return err
 			}
 
 			cmdx.PrintRow(cmd, &selectedProject{ID: id})

@@ -49,7 +49,7 @@ $ ory get oauth2-config --format json   # uses currently selected project
 			}
 			project, err := h.GetProject(cmd.Context(), pID, nil)
 			if err != nil {
-				return cmdx.PrintOpenAPIError(cmd, err)
+				return err
 			}
 
 			cmdx.PrintJSONAble(cmd, outputConfig(project.Services.Oauth2.Config))

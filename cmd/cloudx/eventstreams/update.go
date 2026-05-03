@@ -39,7 +39,7 @@ func NewUpdateEventStreamCmd() *cobra.Command {
 			}
 			stream, err := h.UpdateEventStream(ctx, projectID, streamID, cloud.SetEventStreamBody(c))
 			if err != nil {
-				return cmdx.PrintOpenAPIError(cmd, err)
+				return err
 			}
 
 			_, _ = fmt.Fprintln(h.VerboseErrWriter, "Event stream updated successfully!")

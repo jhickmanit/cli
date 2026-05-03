@@ -41,7 +41,7 @@ func NewAccountExperienceOpenCmd() *cobra.Command {
 
 			project, err := h.GetSelectedProject(cmd.Context())
 			if err != nil {
-				return cmdx.PrintOpenAPIError(cmd, err)
+				return err
 			}
 
 			url := client.CloudAPIsURL(project.Slug + ".projects")

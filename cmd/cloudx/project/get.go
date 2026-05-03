@@ -55,7 +55,7 @@ $ ory get project ecaaa3cb-0730-4ee8-a6df-9553cdfeef89 --format json
 			}
 			project, err := h.GetProject(cmd.Context(), pID, nil)
 			if err != nil {
-				return cmdx.PrintOpenAPIError(cmd, err)
+				return err
 			}
 
 			cmdx.PrintRow(cmd, (*outputProject)(project))

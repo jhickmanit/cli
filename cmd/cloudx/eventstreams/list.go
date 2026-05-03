@@ -24,12 +24,12 @@ func NewListEventStreamsCmd() *cobra.Command {
 
 			projectID, err := h.ProjectID()
 			if err != nil {
-				return cmdx.PrintOpenAPIError(cmd, err)
+				return err
 			}
 
 			streams, err := h.ListEventStreams(cmd.Context(), projectID)
 			if err != nil {
-				return cmdx.PrintOpenAPIError(cmd, err)
+				return err
 			}
 
 			return agentic.WriteTable(cmd, outputList(*streams))

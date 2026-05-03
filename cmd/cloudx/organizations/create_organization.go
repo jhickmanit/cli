@@ -38,7 +38,7 @@ func NewCreateOrganizationCmd() *cobra.Command {
 				Domains: domains,
 			})
 			if err != nil {
-				return cmdx.PrintOpenAPIError(cmd, err)
+				return err
 			}
 
 			_, _ = fmt.Fprintln(h.VerboseErrWriter, "Organization created successfully!")

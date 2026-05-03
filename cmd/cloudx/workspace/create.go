@@ -48,7 +48,7 @@ func NewCreateCmd() *cobra.Command {
 
 			ws, err := h.CreateWorkspace(cmd.Context(), name)
 			if err != nil {
-				return cmdx.PrintOpenAPIError(cmd, err)
+				return err
 			}
 
 			_, _ = fmt.Fprintf(h.VerboseErrWriter, "Workspace created successfully!")

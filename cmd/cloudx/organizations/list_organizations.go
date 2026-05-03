@@ -24,12 +24,12 @@ func NewListOrganizationsCmd() *cobra.Command {
 
 			projectID, err := h.ProjectID()
 			if err != nil {
-				return cmdx.PrintOpenAPIError(cmd, err)
+				return err
 			}
 
 			organizations, err := h.ListOrganizations(cmd.Context(), projectID)
 			if err != nil {
-				return cmdx.PrintOpenAPIError(cmd, err)
+				return err
 			}
 
 			return agentic.WriteTable(cmd, &outputOrganizations{organizations})

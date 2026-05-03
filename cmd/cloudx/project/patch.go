@@ -90,11 +90,11 @@ func runPatch(patchPrefixer func([]string) []string, filePrefixer func([]json.Ra
 
 		id, err := h.ProjectID()
 		if err != nil {
-			return cmdx.PrintOpenAPIError(cmd, err)
+			return err
 		}
 		p, err := h.PatchProject(ctx, id, configs, add, replace, remove)
 		if err != nil {
-			return cmdx.PrintOpenAPIError(cmd, err)
+			return err
 		}
 
 		outputter(cmd, p)

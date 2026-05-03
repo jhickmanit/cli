@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ory/cli/cmd/cloudx/client"
-	"github.com/ory/x/cmdx"
 )
 
 func NewDeleteEventStream() *cobra.Command {
@@ -25,13 +24,13 @@ func NewDeleteEventStream() *cobra.Command {
 
 			projectID, err := h.ProjectID()
 			if err != nil {
-				return cmdx.PrintOpenAPIError(cmd, err)
+				return err
 			}
 			streamID := args[0]
 
 			err = h.DeleteEventStream(cmd.Context(), projectID, streamID)
 			if err != nil {
-				return cmdx.PrintOpenAPIError(cmd, err)
+				return err
 			}
 
 			_, _ = fmt.Fprintln(h.VerboseErrWriter, "Event stream deleted successfully!")

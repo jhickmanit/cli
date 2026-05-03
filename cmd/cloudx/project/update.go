@@ -129,11 +129,11 @@ func runUpdate(filePrefixer func([]json.RawMessage) ([]json.RawMessage, error), 
 		}
 		id, err := h.ProjectID()
 		if err != nil {
-			return cmdx.PrintOpenAPIError(cmd, err)
+			return err
 		}
 		p, err := h.UpdateProject(cmd.Context(), id, name, configs)
 		if err != nil {
-			return cmdx.PrintOpenAPIError(cmd, err)
+			return err
 		}
 
 		outputter(cmd, p)

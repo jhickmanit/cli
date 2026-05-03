@@ -67,7 +67,7 @@ func NewCreateProjectCmd() *cobra.Command {
 			if createWorkspace != "" {
 				ws, err := h.CreateWorkspace(ctx, createWorkspace)
 				if err != nil {
-					return cmdx.PrintOpenAPIError(cmd, err)
+					return err
 				}
 				wsID = new(ws.Id)
 			}
@@ -86,7 +86,7 @@ func NewCreateProjectCmd() *cobra.Command {
 
 			p, err := h.CreateProject(ctx, name, string(environment), wsID, useProject)
 			if err != nil {
-				return cmdx.PrintOpenAPIError(cmd, err)
+				return err
 			}
 
 			_, _ = fmt.Fprintln(h.VerboseErrWriter, "Project created successfully!")

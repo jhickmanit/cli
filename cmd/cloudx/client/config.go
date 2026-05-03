@@ -19,6 +19,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/spf13/pflag"
 
+	"github.com/ory/cli/internal/agentic"
 	"github.com/ory/x/cmdx"
 )
 
@@ -57,12 +58,12 @@ func (c *Config) writeUpdate() error {
 
 	f, err := os.OpenFile(c.location, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
-		return fmt.Errorf("unable to open file %q for writing: %w", c.location, err)
+		return agentic.NewError(agentic.ErrorConfig, agentic.ExitConfig, fmt.Sprintf("unable to open file %q for writing: %s", c.location, err), err)
 	}
 	defer f.Close()
 
 	if err := json.NewEncoder(f).Encode(c); err != nil {
-		return fmt.Errorf("unable to write configuration file %q: %w", c.location, err)
+		return agentic.NewError(agentic.ErrorConfig, agentic.ExitConfig, fmt.Sprintf("unable to write configuration file %q: %s", c.location, err), err)
 	}
 	return nil
 }

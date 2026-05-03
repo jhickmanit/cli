@@ -45,12 +45,12 @@ class Example implements Namespace {}
 
 			projectID, err := h.ProjectID()
 			if err != nil {
-				return cmdx.PrintOpenAPIError(cmd, err)
+				return err
 			}
 
 			p, err := h.PatchProject(ctx, projectID, nil, nil, []string{patch}, nil)
 			if err != nil {
-				return cmdx.PrintOpenAPIError(cmd, err)
+				return err
 			}
 
 			cmdx.PrintJSONAble(cmd, outputConfig(p.Project.Services.Permission.Config))

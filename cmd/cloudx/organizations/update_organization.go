@@ -32,7 +32,7 @@ func NewUpdateOrganizationCmd() *cobra.Command {
 
 			projectID, err := h.ProjectID()
 			if err != nil {
-				return cmdx.PrintOpenAPIError(cmd, err)
+				return err
 			}
 			orgID := args[0]
 
@@ -46,7 +46,7 @@ func NewUpdateOrganizationCmd() *cobra.Command {
 
 			organization, err := h.UpdateOrganization(cmd.Context(), projectID, orgID, body)
 			if err != nil {
-				return cmdx.PrintOpenAPIError(cmd, err)
+				return err
 			}
 
 			_, _ = fmt.Fprintln(h.VerboseErrWriter, "Organization updated successfully!")

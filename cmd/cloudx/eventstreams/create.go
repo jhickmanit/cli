@@ -38,7 +38,7 @@ func NewCreateEventStreamCmd() *cobra.Command {
 			}
 			stream, err := h.CreateEventStream(ctx, projectID, cloud.CreateEventStreamBody(c))
 			if err != nil {
-				return cmdx.PrintOpenAPIError(cmd, err)
+				return err
 			}
 
 			_, _ = fmt.Fprintln(h.VerboseErrWriter, "Event stream created successfully!")

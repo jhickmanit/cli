@@ -13,6 +13,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
+	"github.com/ory/cli/cmd/cloudx/client"
 	internalagentic "github.com/ory/cli/internal/agentic"
 	"github.com/ory/x/cmdx"
 )
@@ -74,6 +75,20 @@ func TestAgenticPromptRequiredOutput(t *testing.T) {
 	require.Equal(t, internalagentic.ExitUsage, envelope.ExitCode)
 	require.Equal(t, "this command requires interactive input", envelope.Message)
 	require.Equal(t, "Enter a name for your workspace", envelope.Prompt)
+}
+
+func TestClassifyCloudClientErrors(t *testing.T) {
+	err := classifyExecutionError(NewRootCmd(), client.ErrNotAuthenticated)
+	cliErr := internalagentic.FromError(err)
+
+	require.Equal(t, internalagentic.ErrorAuth, cliErr.Code)
+	require.Equal(t, internalagentic.ExitAuth, cliErr.ExitCode)
+
+	err = classifyExecutionError(NewRootCmd(), client.ErrProjectNotSet)
+	cliErr = internalagentic.FromError(err)
+
+	require.Equal(t, internalagentic.ErrorUsage, cliErr.Code)
+	require.Equal(t, internalagentic.ExitUsage, cliErr.ExitCode)
 }
 
 func TestUserFacingCommandsDoNotExitProcess(t *testing.T) {

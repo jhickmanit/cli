@@ -144,7 +144,7 @@ func classifyExecutionError(rootCmd *cobra.Command, err error) error {
 	}
 
 	if rootCmd.SilenceUsage {
-		return agentic.FromError(err)
+		return agentic.FromError(client.ClassifyError(err))
 	}
 
 	return agentic.UsageError(err)
