@@ -18,6 +18,7 @@ import (
 	"github.com/gofrs/uuid"
 	"golang.org/x/oauth2"
 
+	"github.com/ory/cli/internal/agentic"
 	cloud "github.com/ory/client-go"
 	"github.com/ory/x/randx"
 	"github.com/ory/x/urlx"
@@ -51,10 +52,16 @@ func (h *CommandHelper) GetAuthenticatedConfig(ctx context.Context) (*Config, er
 		if h.isQuiet {
 			return nil, ErrNoConfigQuiet
 		}
+		if h.nonInteractive {
+			return nil, interactiveAuthRequiredError(err)
+		}
 		_, _ = fmt.Fprintf(h.VerboseErrWriter, "Your session has expired or has otherwise become invalid. Please re-authenticate to continue.\n")
 	} else if stderrors.Is(err, ErrNoConfig) || stderrors.Is(err, ErrNotAuthenticated) {
 		if h.isQuiet {
 			return nil, ErrNoConfigQuiet
+		}
+		if h.nonInteractive {
+			return nil, interactiveAuthRequiredError(err)
 		}
 	}
 	if err := h.ClearConfig(); err != nil {
@@ -95,6 +102,9 @@ func (c *Config) fromUserinfo(info *cloud.OidcUserInfo) error {
 func (h *CommandHelper) Authenticate(ctx context.Context) error {
 	if h.isQuiet {
 		return stderrors.New("can not sign in or sign up when flag --quiet is set")
+	}
+	if h.nonInteractive {
+		return interactiveAuthRequiredError(ErrNotAuthenticated)
 	}
 
 	config, err := h.getConfig()
@@ -171,6 +181,15 @@ func (h *CommandHelper) loginOAuth2(ctx context.Context) (*Config, error) {
 
 	_, _ = fmt.Fprintln(h.VerboseErrWriter, "Successfully logged into Ory Network.")
 	return config, nil
+}
+
+func interactiveAuthRequiredError(err error) error {
+	return agentic.NewError(
+		agentic.ErrorAuth,
+		agentic.ExitAuth,
+		"authentication requires an interactive browser login; run `ory auth` without --non-interactive or configure an API key",
+		err,
+	)
 }
 
 func (h *CommandHelper) oAuth2DanceWithServer(ctx context.Context, client *oauth2.Config) (token *oauth2.Token, err error) {

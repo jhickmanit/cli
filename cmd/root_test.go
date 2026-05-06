@@ -91,6 +91,25 @@ func TestClassifyCloudClientErrors(t *testing.T) {
 	require.Equal(t, internalagentic.ExitUsage, cliErr.ExitCode)
 }
 
+func TestAgenticAuthDoesNotStartInteractiveFlow(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	configPath := filepath.Join(t.TempDir(), "ory-cloud.json")
+
+	code := execute(t.Context(), []string{"--agent", "auth", "--config", configPath}, nil, &stdout, &stderr)
+
+	require.Equal(t, int(internalagentic.ExitAuth), code)
+	require.Empty(t, stdout.String())
+	require.NoFileExists(t, configPath)
+
+	var envelope internalagentic.ErrorEnvelope
+	require.NoError(t, json.Unmarshal(stderr.Bytes(), &envelope))
+	require.Equal(t, internalagentic.SchemaVersion, envelope.SchemaVersion)
+	require.Equal(t, internalagentic.ErrorAuth, envelope.Code)
+	require.Equal(t, internalagentic.ErrorNumberAuth, envelope.CodeNumber)
+	require.Equal(t, internalagentic.ExitAuth, envelope.ExitCode)
+	require.Contains(t, envelope.Message, "interactive browser login")
+}
+
 func TestUserFacingCommandsDoNotExitProcess(t *testing.T) {
 	repoRoot, err := filepath.Abs("..")
 	require.NoError(t, err)
