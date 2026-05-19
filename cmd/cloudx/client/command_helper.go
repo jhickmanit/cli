@@ -134,7 +134,7 @@ func WithOpenBrowserHook(openBrowser func(string) error) CommandHelperOption {
 func NewCobraCommandHelper(cmd *cobra.Command, opts ...CommandHelperOption) (*CommandHelper, error) {
 	stdErr := cmd.ErrOrStderr()
 	quiet := flagx.MustGetBool(cmd, cmdx.FlagQuiet)
-	if quiet {
+	if quiet || agentic.WantsJSONEnvelope(cmd) {
 		stdErr = io.Discard
 	}
 	defaultOpts := []CommandHelperOption{

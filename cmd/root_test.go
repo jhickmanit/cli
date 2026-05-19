@@ -11,6 +11,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/require"
 
 	"github.com/ory/cli/cmd/cloudx/client"
@@ -108,6 +109,25 @@ func TestAgenticAuthDoesNotStartInteractiveFlow(t *testing.T) {
 	require.Equal(t, internalagentic.ErrorNumberAuth, envelope.CodeNumber)
 	require.Equal(t, internalagentic.ExitAuth, envelope.ExitCode)
 	require.Contains(t, envelope.Message, "interactive browser login")
+}
+
+func TestAgenticSuccessSuppressesVerboseStderr(t *testing.T) {
+	var stderr bytes.Buffer
+	cmd := &cobra.Command{}
+	cmd.SetContext(t.Context())
+	cmd.SetErr(&stderr)
+	cmd.Flags().Bool("agent", true, "")
+	cmd.Flags().Bool(cmdx.FlagQuiet, false, "")
+	cmd.Flags().Bool(client.FlagYes, false, "")
+	cmd.Flags().String(client.FlagConfig, "", "")
+	cmd.Flags().String(client.FlagProject, "", "")
+	cmd.Flags().String(client.FlagWorkspace, "", "")
+
+	helper, err := client.NewCobraCommandHelper(cmd)
+	require.NoError(t, err)
+
+	_, _ = helper.VerboseErrWriter.Write([]byte("human status"))
+	require.Empty(t, stderr.String())
 }
 
 func TestUserFacingCommandsDoNotExitProcess(t *testing.T) {
